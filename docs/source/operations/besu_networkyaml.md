@@ -89,8 +89,12 @@ The snapshot of the `config` section with example values is below
     transaction_manager: "orion"    # Option is orion only
     # This is the version of "orion" docker image that will be deployed
     # Supported versions #
-    # orion: 1.5.3 (for besu 1.4.4)
-    tm_version: "1.5.3"               # This is the version of "orion" docker image that will be deployed
+    # orion: 1.5.2 (for besu 1.4.4)
+    tm_version: "1.5.2"               # This is the version of "orion" docker image that will be deployed
+    # TLS can be True or False for the orion tm
+    tm_tls: True
+    # Tls trust value
+    tm_trust: "ca-or-tofu"                  # Options are: "whitelist", "ca-or-tofu", "ca", "tofu"
     ## File location for saving the genesis file should be provided.
     genesis: "/home/user/blockchain-automation-framework/build/besu_genesis"   # Location where genesis file will be saved
 
@@ -102,7 +106,9 @@ The fields under `config` are
 | consensus   | Currently supports `ibft`.                                 |
 | subject     | This is the subject of the root CA which will be created for the Hyperledger Besu network. The root CA is for development purposes only, production networks should already have the root certificates.   |
 | transaction_manager    | Currently supports `orion`. Please update the remaining items according to the transaction_manager chosen as not all values are valid for the transaction_manager. |
-| tm_version         | This is the version of `orion` docker image that will be deployed. Supported versions: `1.5.3` for `orion`. |
+| tm_version         | This is the version of `orion` docker image that will be deployed. Supported versions: `1.5.2` for `orion`. |
+| tm_tls | Options are `True` and `False`. This enables TLS for the transaction manager and Besu node. `False` is not recommended for production. |
+| tm_trust | Options are: `whitelist`, `ca-or-tofu`, `ca`, `tofu`. This is the trust relationships for the transaction managers. More details [for orion]( https://docs.orion.pegasys.tech/en/latest/Tutorials/TLS/ ).|
 | genesis | This is the path where `genesis.json` will be stored for a new network; for adding new node, the existing network's genesis.json should be available in json format in this file. |
 
 
@@ -120,7 +126,7 @@ The snapshot of an organization field with sample values is below
       external_url_suffix: test.besu.blockchaincloudpoc.com
       # List of all public IP addresses of each availability zone from all organizations in the same k8s cluster
       # The Ambassador will be set up using these static IPs. The child services will be assigned the first IP in this list.
-      publicIps: ["3.221.78.194","21.23.74.154"] 
+      publicIps: ["3.221.78.194","21.23.74.154"] # List of all public IP addresses of each availability zone from all organizations in the same k8s cluster        
       cloud_provider: aws   # Options: aws, azure, gcp, minikube
 ```
 Each `organization` under the `organizations` section has the following fields. 
@@ -143,7 +149,7 @@ For the `aws` and `k8s` field the snapshot with sample values is below
       aws:
         access_key: "<aws_access_key>"    # AWS Access key, only used when cloud_provider=aws
         secret_key: "<aws_secret>"        # AWS Secret key, only used when cloud_provider=aws
-  
+        region: "<aws_region>"                # AWS Region where cluster and EIPs are created
       # Kubernetes cluster deployment variables.
       k8s:
         context: "<cluster_context>"
@@ -156,6 +162,7 @@ The `aws` field under each organization contains: (This will be ignored if cloud
 |-------------|----------------------------------------------------------|
 | access_key                              | AWS Access key  |
 | secret_key                              | AWS Secret key  |
+| region            | The AWS region where K8s cluster and the EIPs reside |
 
 The `k8s` field under each organization contains
 
@@ -210,13 +217,11 @@ Each organization with type as `member` will have a peers service. The snapshot 
             ambassador: 15011       #Port exposed on ambassador service (use one port per org if using single cluster)
           ws:
             port: 8546
-            ambassador: 15012
           tm_nodeport:
             port: 8888         
             ambassador: 15013   # Port exposed on ambassador service (Transaction manager node port)
           tm_clientport:
-            port: 8080         
-            ambassador: 15014    # Port exposed on ambassador service (Transaction manager client port)    
+            port: 8080             
 ```
 The fields under `peer` service are
 
@@ -230,11 +235,9 @@ The fields under `peer` service are
 | rpc.port   | RPC port for Besu|
 | rpc.ambassador | The RPC Port when exposed on ambassador service|
 | ws.port   | Webservice port for Besu|
-| ws.ambassador | The Webservice Port when exposed on ambassador service|
 | tm_nodeport.port   | Port used by Transaction manager `orion`. |
 | tm_nodeport.ambassador | The tm port when exposed on ambassador service. |
 | tm_clientport.port   | Client Port used by Transaction manager `orion`. |
-| tm_clientport.ambassador | The Client port when exposed on ambassador service. |
 
 Each organization with type as `validator` will have a validator service. The snapshot of validator service with example values is below
 ```yaml
@@ -250,7 +253,6 @@ Each organization with type as `validator` will have a validator service. The sn
             ambassador: 15011       #Port exposed on ambassador service (use one port per org if using single cluster)
           ws:
             port: 8546          
-            ambassador: 8443    # Port exposed on ambassador service (Transaction manager port)
             
 ```
 The fields under `validator` service are
@@ -264,6 +266,5 @@ The fields under `validator` service are
 | rpc.port   | RPC port for Besu|
 | rpc.ambassador | The RPC Port when exposed on ambassador service|
 | ws.port   | Webservice port for Besu|
-| ws.ambassador | The Webservice Port when exposed on ambassador service|
 
 *** feature is in future scope

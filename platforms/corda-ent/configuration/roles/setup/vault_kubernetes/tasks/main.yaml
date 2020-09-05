@@ -3,15 +3,6 @@
 # neccessary configurations.
 #################################################################################################
 
-# Check if namespace created
-- name: "Waiting for the namespace {{ component_ns }} to be created"
-  include_role:
-    name: "{{ playbook_dir }}/../../shared/configuration/roles/check/k8_component"
-  vars:
-    component_type: "Namespace"
-    component_name: "{{ component_ns }}"
-    type: "retry"
-
 # Ensures the build directory
 - name: "Creating the build directory"
   include_role:
@@ -82,42 +73,27 @@
   register: vault_policy_result
   ignore_errors: yes
 
-- debug:
-    msg: "{{ component_type }}"
-
 #####################################################################################################################
 # This task creates the access policy for various corda-ent entity
-- name: Create policy for Access Control
+- name: Create policy for Access Control for CENM
   shell: |
     cd ./build    
-    echo "path \"secret/cenm/*\" {
+    echo "path \"secret/{{ org.name | lower }}/*\" {
         capabilities = [\"read\", \"list\", \"create\"]
-    }"  >>  vault-crypto-{{ component_type }}-{{ component_name }}-ro.hcl
-    vault write sys/policy/vault-crypto-{{ component_type }}-{{ component_name }}-ro policy="@vault-crypto-{{ component_type }}-{{ component_name }}-ro.hcl"
+    }"  >>  vault-crypto-{{ org.name | lower }}-ro.hcl
+    vault write sys/policy/vault-crypto-{{ org.type }}-{{ org.name | lower }}-ro policy="@vault-crypto-{{ org.name | lower }}-ro.hcl"
   environment:
     VAULT_ADDR: "{{ vault.url }}"
     VAULT_TOKEN: "{{ vault.root_token }}"
   when: vault_policy_result.failed == True and component_type  == "cenm"    # Run if policy check failed
 
-- name: Create policy for Access Control
+- name: Create policy for Access Control for nodes
   shell: |
     cd ./build    
-    echo "path \"secret/notary/*\" {
-        capabilities = [\"read\", \"list\", \"create\"]
-    }"  >>  vault-crypto-{{ component_type }}-{{ component_name }}-ro.hcl
-    vault write sys/policy/vault-crypto-{{ component_type }}-{{ component_name }}-ro policy="@vault-crypto-{{ component_type }}-{{ component_name }}-ro.hcl"
-  environment:
-    VAULT_ADDR: "{{ vault.url }}"
-    VAULT_TOKEN: "{{ vault.root_token }}"
-  when: vault_policy_result.failed == True and component_type == 'notary'   # Run if policy check failed
-
-- name: Create policy for Access Control
-  shell: |
-    cd ./build    
-    echo "path \"secret/{{ component_ns }}/*\" {
-        capabilities = [\"read\", \"list\", \"create\"]
-    }"  >>  vault-crypto-{{ component_type }}-{{ component_name }}-ro.hcl
-    vault write sys/policy/vault-crypto-{{ component_type }}-{{ component_name }}-ro policy="@vault-crypto-{{ component_type }}-{{ component_name }}-ro.hcl"
+    echo "path \"secret/{{ org.name | lower }}/*\" {
+        capabilities = [\"read\", \"list\"]
+    }"  >>  vault-crypto-{{ org.name | lower }}-ro.hcl
+    vault write sys/policy/vault-crypto-{{ org.type }}-{{ org.name | lower }}-ro policy="@vault-crypto-{{ org.name | lower }}-ro.hcl"
   environment:
     VAULT_ADDR: "{{ vault.url }}"
     VAULT_TOKEN: "{{ vault.root_token }}"
@@ -126,16 +102,25 @@
 # This task creates the vault auth
 - name: Create Vault auth role
   shell: |
-    vault write auth/{{ component_auth }}/role/vault-role bound_service_account_names=vault-auth bound_service_account_namespaces={{ component_ns }} policies=vault-crypto-{{ component_type }}-{{ component_name }}-ro ttl=120s
+    vault write auth/{{ component_auth }}/role/vault-role bound_service_account_names=vault-auth bound_service_account_namespaces={{ component_ns }} policies=vault-crypto-{{ org.type }}-{{ org.name | lower }}-ro ttl=120s
   environment:
     VAULT_ADDR: "{{ vault.url }}"
     VAULT_TOKEN: "{{ vault.root_token }}"
   when: not vault_auth_status     # Run when auth_path is not found
 
 #####################################################################################################################
-# This task creates the docker pull credentials for image registry
+# Check if Docker credentials exist already
+- name: "Checking if the docker credentials already exists"
+  include_role:
+    name: "{{ playbook_dir }}/../../shared/configuration/roles/check/setup"
+  vars:
+    check: "docker_credentials"
+    component_name: "{{ component_ns }}"
+  register: get_regcred
+
+#####################################################################################################################
+# This task creates the docker pull credentials for image registry if it doesn't already exist
 - name: Create the docker pull credentials
   shell: |
     KUBECONFIG={{ kubernetes.config_file }} kubectl create secret -n {{ component_ns }} docker-registry regcred --docker-server={{ network.docker.url }} --docker-username={{ network.docker.username }} --docker-password={{ network.docker.password }} --docker-email="test@abc.mail"
-  when: not vault_auth_status
-  ignore_errors: yes
+  when: get_regcred.resources|length == 0

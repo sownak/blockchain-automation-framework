@@ -5,7 +5,7 @@ metadata:
   name: {{ .Values.nodeName }}-pkitool-conf
   namespace: {{ .Values.metadata.namespace }}
   labels:
-    app.kubernetes.io/name: {{ .Values.nodeName }}-cenm-conf
+    app.kubernetes.io/name: {{ .Values.nodeName }}-pkitool-conf
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     app.kubernetes.io/instance: {{ .Release.Name }}

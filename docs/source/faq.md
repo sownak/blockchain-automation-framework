@@ -81,15 +81,15 @@ No, CI/CD pipeline tools like Jenkins are not mandatory, but it could help a use
 No, a user should be able to run the Ansible command on any machine as long as Ansible command CLI is installed.
 
 ### Is there an example ansible_hosts file?
-Yes, you can find an example ansible_hosts file [here](https://github.com/hyperledger-labs/blockchain-automation-framework/tree/master/platforms/shared/inventory/ansible_provisoners). The configuration in this file means that all Ansible commands will be run in the same machine that works as both an Ansible client and server machine.
+Yes, you can find an example ansible_hosts file [here](https://github.com/hyperledger-labs/blockchain-automation-framework/tree/master/platforms/shared/inventory/ansible_provisioners). The configuration in this file means that all Ansible commands will be run in the same machine that works as both an Ansible client and server machine.
 
 ### Can I specify the tools versions such as kubectl, helm in this project?
 Yes, you can specify tools versions like kubectl, helm, HashiCorp Vault, AWS-authenticator in the playbook [environment-setup.yaml](https://github.com/hyperledger-labs/blockchain-automation-framework/tree/master/platforms/shared/configuration/environment-setup.yaml).
 
 ### How would system react if we plan to update tools versions (e.g. kubectl, helm)?
-Honest speaking, we don't know. Currently the Blockchain Automation Framework has been tested on specific versions of these tools, see below:
-(1) Kubectl: v1.14.2
-(2) Helm: v2.14.1
+Honestly speaking, we don't know. The latest version Blockchain Automation Framework has been tested on specific client versions of these tools, see below:
+(1) Kubectl: v1.14.2 for Kubernetes 1.14, v1.16.13 for Kubernetes 1.16
+(2) Helm: v2.14.1 for Kubernetes 1.14, v2.16.10 for Kubernetes 1.16
 (3) HashiCorp Vault: v1.0.1
 (4) AWS-Authenticator: v1.10.3
 

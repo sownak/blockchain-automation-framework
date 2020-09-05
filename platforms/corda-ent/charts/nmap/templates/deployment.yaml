@@ -65,7 +65,7 @@ spec:
               # Setting up the environment to get secrets from Vault
               echo "Getting secrets from Vault Server"
               KUBE_SA_TOKEN=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)
-              VAULT_TOKEN=$(curl -sS --request POST ${VAULT_ADDR}/v1/auth/${KUBERNETES_AUTH_PATH}/login -H "Content-Type: application/json" -d '{"role":"vault-role","jwt":"'"${KUBE_SA_TOKEN}"'"}' | jq -r 'if .errors then . else .auth.client_token end')
+              VAULT_TOKEN=$(curl -sS --request POST ${VAULT_ADDR}/v1/auth/${KUBERNETES_AUTH_PATH}/login -H "Content-Type: application/json" -d '{"role":"'"${VAULT_APP_ROLE}"'","jwt":"'"${KUBE_SA_TOKEN}"'"}' | jq -r 'if .errors then . else .auth.client_token end')
               validateVaultResponse 'vault login token' "${VAULT_TOKEN}"
               echo "logged into vault"
 
@@ -113,7 +113,7 @@ spec:
               while [ "$COUNTER" -lt {{ $.Values.healthcheck.readinessthreshold }} ]
               do
                   # get keystores from vault to see if certificates are created and put in vault
-                  LOOKUP_SECRET_RESPONSE=$(curl -sS --header "X-Vault-Token: ${VAULT_TOKEN}" ${VAULT_ADDR}/v1/${CERTS_SECRET_PREFIX}/networkmap/certs | jq -r 'if .errors then . else . end')
+                  LOOKUP_SECRET_RESPONSE=$(curl -sS --header "X-Vault-Token: ${VAULT_TOKEN}" ${VAULT_ADDR}/v1/${CERTS_SECRET_PREFIX}/{{ $.Values.nodeName }}/certs | jq -r 'if .errors then . else . end')
                   if echo ${LOOKUP_SECRET_RESPONSE} | grep "errors"
                   then
                     sleep {{ $.Values.healthcheck.readinesscheckinterval }}
@@ -172,7 +172,7 @@ spec:
               while [ "$COUNTER" -lt {{ $.Values.healthcheck.readinessthreshold }} ]
               do
                   # get crls from vault to see if certificates are created and put in vault
-                  LOOKUP_SECRET_RESPONSE=$(curl -sS --header "X-Vault-Token: ${VAULT_TOKEN}" ${VAULT_ADDR}/v1/${CERTS_SECRET_PREFIX}/idman/crls | jq -r 'if .errors then . else . end')
+                  LOOKUP_SECRET_RESPONSE=$(curl -sS --header "X-Vault-Token: ${VAULT_TOKEN}" ${VAULT_ADDR}/v1/${CERTS_SECRET_PREFIX}/{{ $.Values.idmanName }}/crls | jq -r 'if .errors then . else . end')
                   if echo ${LOOKUP_SECRET_RESPONSE} | grep "errors"
                   then
                     sleep {{ $.Values.healthcheck.readinesscheckinterval }}
@@ -206,7 +206,7 @@ spec:
         - name: notary-nodeinfo
           mountPath: /notary-nodeinfo
       - name: setnparam
-        image: "{{ required "nmap[setnparam]: missing value for .Values.dockerImage.name" .Values.dockerImage.name }}:{{ required "nmap[setnparam]: missing value for .Values.dockerImage.tag" .Values.dockerImage.tag }}"
+        image: "{{ required "nmap[setnparam]: missing value for .Values.dockerImage.name" .Values.dockerImage.name }}"
         imagePullPolicy: {{ .Values.dockerImage.pullPolicy }}
         env:
           - name: ACCEPT_LICENSE
@@ -221,6 +221,8 @@ spec:
           then
             echo "Setting network parameters for deployment..."
             bin/set-network-parameters.sh
+          else
+            echo "Already set, no need to set network parameters"
           fi
         volumeMounts:
         - name: nmap-conf
@@ -241,12 +243,12 @@ spec:
           mountPath: /opt/corda/h2
         resources:
           requests:
-            memory: {{ .Values.cordaJarMx }}G
+            memory: {{ .Values.cordaJarMx }}M
           limits:
-            memory: {{ add .Values.cordaJarMx 2 }}G
+            memory: {{ add .Values.cordaJarMx 2 }}M
       containers:
       - name: main
-        image: "{{ required "nmap[main]: missing value for .Values.dockerImage.name" .Values.dockerImage.name }}:{{ required "nmap[main]: missing value for .Values.dockerImage.tag" .Values.dockerImage.tag }}"
+        image: "{{ required "nmap[main]: missing value for .Values.dockerImage.name" .Values.dockerImage.name }}"
         imagePullPolicy: {{ .Values.dockerImage.pullPolicy }}
         env:
           - name: ACCEPT_LICENSE
@@ -276,11 +278,11 @@ spec:
           mountPath: /opt/corda/DATA
         resources:
           requests:
-            memory: {{ .Values.cordaJarMx }}G
+            memory: {{ .Values.cordaJarMx }}M
           limits:
-            memory: {{ add .Values.cordaJarMx 2 }}G
+            memory: {{ add .Values.cordaJarMx 2 }}M
       - name: logs
-        image: "{{ required "nmap[logs]: missing value for .Values.dockerImage.name" .Values.dockerImage.name }}:{{ required "nmap[logs]: missing value for .Values.dockerImage.tag" .Values.dockerImage.tag }}"
+        image: "{{ required "nmap[logs]: missing value for .Values.dockerImage.name" .Values.dockerImage.name }}"
         imagePullPolicy: {{ .Values.dockerImage.pullPolicy }}
         env:
           - name: ACCEPT_LICENSE
@@ -296,14 +298,14 @@ spec:
         - name: nmap-logs
           mountPath: /opt/corda/logs
       imagePullSecrets:
-      - name: cenm-registry
+      - name: {{ .Values.image.imagepullsecret }}
       volumes:
         - name: certificates
           emptyDir:
             medium: Memory
         - name: nmap-etc
-          emptyDir:
-            medium: Memory
+          persistentVolumeClaim:
+            claimName: {{ .Values.nodeName }}-etc
         - name: nmap-conf
           configMap:
             name: {{ .Values.nodeName }}-conf

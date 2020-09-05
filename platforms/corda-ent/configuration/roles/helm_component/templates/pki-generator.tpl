@@ -12,7 +12,12 @@ spec:
     ref: {{ git_branch }}
     path: {{ charts_dir }}/generate-pki
   values:
-    nodeName: {{ node_name }}
+    nodeName: {{ name }}
+    cenmServices:
+      signerName: {{ signerName }}
+      idmanName: {{ idmanName }}
+      networkmapName: {{ networkmapName }}
+      notaryName: {{ notaryName }}
     replicas: 1
     metadata:
       namespace: {{ component_ns }}
@@ -43,7 +48,7 @@ spec:
       user: {{ username }}
       password: {{ password }}
     idmanPublicIP: {{ idman_ip }}
-    idmanPort: {{ idman_proxy_port }}
+    idmanPort: {{ idman_port }}
     serviceLocations:
       identityManager:
         host: {{ idman_host }}
@@ -66,7 +71,7 @@ spec:
       NetworkParameters:
         schedule:
           interval: 1m
-    cordaJarMx: 1
+    cordaJarMx: 256
     healthCheckNodePort: 0
     jarPath: bin
     configPath: etc
