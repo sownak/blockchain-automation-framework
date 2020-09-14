@@ -25,12 +25,7 @@
 - name: Create value file for idman
   include_role:
     name: helm_component
-<<<<<<< HEAD:platforms/corda-ent/configuration/roles/setup/idman/tasks/main.yaml
-  vars:
-    component_name: "{{ org.name | lower }}idman"
-=======
   vars:    
->>>>>>> upstream/master:platforms/r3-corda-ent/configuration/roles/setup/idman/tasks/main.yaml
     type: "idman"
     name: "{{ org.name | lower }}"
     component_name: "{{ org.name | lower }}idman"        

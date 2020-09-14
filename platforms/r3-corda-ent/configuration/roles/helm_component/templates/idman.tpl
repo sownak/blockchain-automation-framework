@@ -21,11 +21,7 @@ spec:
       pullPolicy: Always
       imagePullSecret: "regcred"
     storage:
-<<<<<<< HEAD:platforms/corda-ent/configuration/roles/helm_component/templates/idman.tpl
-      name: {{ storageclass }}
-=======
       name: "cordaentsc"
->>>>>>> upstream/master:platforms/r3-corda-ent/configuration/roles/helm_component/templates/idman.tpl
       memory: 700Mi
     acceptLicense: YES
     vault:

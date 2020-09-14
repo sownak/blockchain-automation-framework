@@ -229,15 +229,9 @@ spec:
           mountPath: {{ .Values.nodeConf.volume.baseDir }}/{{ .Values.nodeConf.workspacePath }}/logs
         resources:
           requests:
-<<<<<<< HEAD:platforms/corda-ent/charts/node/templates/deployment.yaml
-            memory: {{ .Values.cordaJarMx }}M
-          limits:
-            memory: {{ add .Values.cordaJarMx 2 }}M
-=======
             memory: {{ .Values.nodeConf.pod.resources.requests }}
           limits:
             memory: {{ .Values.nodeConf.pod.resources.limits }}
->>>>>>> upstream/master:platforms/r3-corda-ent/charts/node/templates/deployment.yaml
       - name: logs
         image: "{{ .Values.image.nodeContainerName }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}

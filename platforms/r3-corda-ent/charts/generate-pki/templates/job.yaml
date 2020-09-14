@@ -55,11 +55,7 @@ spec:
               memory: {{ .Values.cordaJarMx }}M
             limits:
               memory: {{ add .Values.cordaJarMx 2 }}M
-<<<<<<< HEAD:platforms/corda-ent/charts/generate-pki/templates/job.yaml
-        - name: store-certs-in-vault
-=======
         - name: store-certs
->>>>>>> upstream/master:platforms/r3-corda-ent/charts/generate-pki/templates/job.yaml
           image: {{ .Values.image.initContainerName }}
           imagePullPolicy: Always
           env:

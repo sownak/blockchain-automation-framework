@@ -6,13 +6,8 @@ export nodeInfoFile
 envsubst <<"EOF" > additional-node-infos/network-parameters-initial.conf.tmp
 notaries : [
   {
-<<<<<<< HEAD:platforms/corda-ent/charts/notary-initial-registration/files/create-network-parameters-file.sh
-    notaryNodeInfoFile: "notary-nodeinfo/notary_nodeinfo"
-    validating = "{{ .Values.notary.validating }}"
-=======
     notaryNodeInfoFile: "notary-nodeinfo/${nodeInfoFile}"
     validating = "{{ .Values.nodeConf.notary.validating }}"
->>>>>>> upstream/master:platforms/r3-corda-ent/charts/notary-initial-registration/files/create-network-parameters-file.sh
   }
 ]
 minimumPlatformVersion = 1

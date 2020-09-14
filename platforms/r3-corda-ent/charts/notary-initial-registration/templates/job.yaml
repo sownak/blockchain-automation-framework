@@ -126,10 +126,6 @@ spec:
                   FLAG=true
                   echo "DB up and running"
               fi
-<<<<<<< HEAD:platforms/corda-ent/charts/notary-initial-registration/templates/job.yaml
-
-=======
->>>>>>> upstream/master:platforms/r3-corda-ent/charts/notary-initial-registration/templates/job.yaml
               if [ "$FLAG" == false ]
               then
                   echo "Retry attempted $COUNTER times, retrying after {{ $.Values.healthcheck.readinesscheckinterval }} seconds"
@@ -190,17 +186,10 @@ spec:
             mountPath: {{ $.Values.nodeConf.volume.baseDir }}/DATA
           resources:
             requests:
-<<<<<<< HEAD:platforms/corda-ent/charts/notary-initial-registration/templates/job.yaml
-              memory: {{ .Values.cordaJarMx }}M
-            limits:
-              memory: {{ add .Values.cordaJarMx 2 }}M
-        - name: store-certs-in-vault
-=======
               memory: {{ .Values.nodeConf.pod.resources.requests }}
             limits:
               memory: {{ .Values.nodeConf.pod.resources.limits }}
         - name: store-certs
->>>>>>> upstream/master:platforms/r3-corda-ent/charts/notary-initial-registration/templates/job.yaml
           image: {{ .Values.image.initContainerName }}
           imagePullPolicy: Always
           env:
@@ -227,14 +216,6 @@ spec:
               fi
             }           
 
-<<<<<<< HEAD:platforms/corda-ent/charts/notary-initial-registration/templates/job.yaml
-
-            # setting up env to get secrets from vault
-            KUBE_SA_TOKEN=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)
-            VAULT_TOKEN=$(curl -sS --request POST ${VAULT_ADDR}/v1/auth/${KUBERNETES_AUTH_PATH}/login -H "Content-Type: application/json" -d '{"role":"'"${VAULT_APP_ROLE}"'","jwt":"'"${KUBE_SA_TOKEN}"'"}' | jq -r 'if .errors then . else .auth.client_token end')
-            
-=======
->>>>>>> upstream/master:platforms/r3-corda-ent/charts/notary-initial-registration/templates/job.yaml
             # perform check if certificates are ready or not, and upload certificate into vault when ready
             COUNTER=1
             cd ${BASE_DIR}/certificates
@@ -293,16 +274,7 @@ spec:
           - name: notary-certificates
             mountPath: {{ $.Values.nodeConf.volume.baseDir }}/certificates
           - name: certificates
-<<<<<<< HEAD:platforms/corda-ent/charts/notary-initial-registration/templates/job.yaml
-            mountPath: /opt/corda/DATA
-          resources:
-            requests:
-              memory: {{ .Values.cordaJarMx }}M
-            limits:
-              memory: {{ add .Values.cordaJarMx 2 }}M
-=======
             mountPath: {{ $.Values.nodeConf.volume.baseDir }}/DATA
->>>>>>> upstream/master:platforms/r3-corda-ent/charts/notary-initial-registration/templates/job.yaml
         imagePullSecrets:
         - name: {{ .Values.image.imagePullSecret }}
         volumes:

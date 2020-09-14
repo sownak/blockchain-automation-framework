@@ -1,35 +1,5 @@
 # This role creates the the value file for bridge chart and pushes it to the git repository
 
-<<<<<<< HEAD:platforms/corda-ent/configuration/roles/setup/bridge/tasks/main.yaml
-# Wait for notary pod to come up
-- name: "Waiting for notary pod to come up"
-  include_role:
-    name: "{{ playbook_dir }}/../../shared/configuration/roles/check/helm_component"
-  vars:
-    component_type: "Pod"
-    namespace: "{{ component_ns }}"
-    component_name: "{{ org.services.notary.name }}"
-    kubernetes: "{{ org.k8s }}"
-    label_selectors:
-      - app = {{ component_name }}
-  loop: "{{ network['organizations'] }}"
-  loop_control:
-    loop_var: org
-  when: org.type == 'cenm'
-
-# TODO: Change of this logic here and in the chart
-# Fetch the networkmap namespace and port
-- name: Get the networkmap namespace and port
-  set_fact:
-    networkmap_ns: "{{ component_ns }}"
-    networkmap_port: "{{ org.services.networkmap.ports.servicePort }}"
-  loop: "{{ network['organizations'] }}"
-  loop_control:
-    loop_var: org
-  when: org.type == 'cenm'
-
-=======
->>>>>>> upstream/master:platforms/r3-corda-ent/configuration/roles/setup/bridge/tasks/main.yaml
 # This task will will create the value file for bridge
 - name: Create value file for bridge
   include_role:

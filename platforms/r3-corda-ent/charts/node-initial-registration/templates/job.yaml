@@ -102,9 +102,6 @@ spec:
                 echo "Done"
           volumeMounts:
           - name: certificates
-<<<<<<< HEAD:platforms/corda-ent/charts/node-initial-registration/templates/job.yaml
-            mountPath: /DATA        
-=======
             mountPath: /DATA   
         - name: db-healthcheck
           image: {{ .Values.image.initContainerName }}
@@ -148,7 +145,6 @@ spec:
                 exit 1
                 break
             fi     
->>>>>>> upstream/master:platforms/r3-corda-ent/charts/node-initial-registration/templates/job.yaml
         containers:
         - name: registration
           image: "{{ .Values.image.nodeContainerName }}"
@@ -186,17 +182,10 @@ spec:
             mountPath: /opt/corda/DATA
           resources:
             requests:
-<<<<<<< HEAD:platforms/corda-ent/charts/node-initial-registration/templates/job.yaml
-              memory: {{ .Values.cordaJarMx }}M
-            limits:
-              memory: {{ add .Values.cordaJarMx 2 }}M
-        - name: store-certs-in-vault
-=======
               memory: {{ .Values.nodeConf.pod.resources.requests }}
             limits:
               memory: {{ .Values.nodeConf.pod.resources.limits }}
         - name: store-certs
->>>>>>> upstream/master:platforms/r3-corda-ent/charts/node-initial-registration/templates/job.yaml
           image: {{ .Values.image.initContainerName }}
           imagePullPolicy: Always
           env:
@@ -216,19 +205,12 @@ spec:
           args:
           - |-
             #!/usr/bin/env sh
-<<<<<<< HEAD:platforms/corda-ent/charts/node-initial-registration/templates/job.yaml
-
-            # setting up env to get secrets from vault
-            KUBE_SA_TOKEN=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)
-            VAULT_TOKEN=$(curl -sS --request POST ${VAULT_ADDR}/v1/auth/${KUBERNETES_AUTH_PATH}/login -H "Content-Type: application/json" -d '{"role":"'"${VAULT_APP_ROLE}"'","jwt":"'"${KUBE_SA_TOKEN}"'"}' | jq -r 'if .errors then . else .auth.client_token end')
-=======
             validateVaultResponse () {
               if echo ${2} | grep "errors"; then
                  echo "ERROR: unable to retrieve ${1}: ${2}"
                  exit 1
               fi
             }          
->>>>>>> upstream/master:platforms/r3-corda-ent/charts/node-initial-registration/templates/job.yaml
 
             # perform check if certificates are ready or not, and upload certificate into vault when ready
             COUNTER=1
@@ -267,15 +249,9 @@ spec:
             mountPath: /opt/corda/DATA
           resources:
             requests:
-<<<<<<< HEAD:platforms/corda-ent/charts/node-initial-registration/templates/job.yaml
-              memory: {{ .Values.cordaJarMx }}M
-            limits:
-              memory: {{ add .Values.cordaJarMx 2 }}M
-=======
               memory: {{ .Values.nodeConf.pod.resources.requests }}
             limits:
               memory: {{ .Values.nodeConf.pod.resources.limits }}
->>>>>>> upstream/master:platforms/r3-corda-ent/charts/node-initial-registration/templates/job.yaml
         volumes:
         - name: node-conf
           configMap:

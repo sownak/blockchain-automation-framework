@@ -246,15 +246,9 @@ spec:
           mountPath: /opt/corda/h2
         resources:
           requests:
-<<<<<<< HEAD:platforms/corda-ent/charts/nmap/templates/deployment.yaml
-            memory: {{ .Values.cordaJarMx }}M
-          limits:
-            memory: {{ add .Values.cordaJarMx 2 }}M
-=======
             memory: {{ .Values.config.pod.resources.requests }}
           limits:
             memory: {{ .Values.config.pod.resources.limits }}
->>>>>>> upstream/master:platforms/r3-corda-ent/charts/nmap/templates/deployment.yaml
       containers:
       - name: main
         image: "{{ required "nmap[main]: missing value for .Values.image.nmapContainerName" .Values.image.nmapContainerName }}"
@@ -294,15 +288,9 @@ spec:
           mountPath: /opt/corda/DATA
         resources:
           requests:
-<<<<<<< HEAD:platforms/corda-ent/charts/nmap/templates/deployment.yaml
-            memory: {{ .Values.cordaJarMx }}M
-          limits:
-            memory: {{ add .Values.cordaJarMx 2 }}M
-=======
             memory: {{ .Values.config.pod.resources.requests }}
           limits:
             memory: {{ .Values.config.pod.resources.limits }}
->>>>>>> upstream/master:platforms/r3-corda-ent/charts/nmap/templates/deployment.yaml
       - name: logs
         image: "{{ required "nmap[logs]: missing value for .Values.image.nmapContainerName" .Values.image.nmapContainerName }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
